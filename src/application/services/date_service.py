@@ -27,9 +27,19 @@ def obtener_numero_mes_actual():
         int: Número del mes actual (1 para Enero, 2 para Febrero, etc.).
     """
     # Obtener la fecha actual
-    fecha_actual = datetime.datetime.now()
+    fecha_actual = datetime.now()
 
     # Extraer el mes actual como un número y devolverlo
     numero_mes_actual = fecha_actual.month
 
     return numero_mes_actual
+
+def obtener_dia_semana(dia):
+    dias = ['L','M','M','J','V','S','D']
+    fecha_actual = datetime.now()
+    mes = str(fecha_actual.month)
+    year = str(fecha_actual.year)
+    fecha = dia + '/' + mes + '/' + year
+    fecha = datetime.strptime(fecha, "%d/%m/%Y")
+    index = fecha.weekday()
+    return dias[index]
