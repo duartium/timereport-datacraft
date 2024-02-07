@@ -1,27 +1,74 @@
 import xlsxwriter
-from datetime import datetime
+import datetime
 import locale
 import io
-from fastapi.responses import StreamingResponse
-from application.services.date_service import get_days_of_month, obtener_numero_mes_actual, obtener_dia_semana,es_fin_de_semana, handler_response
+import zipfile
+from fastapi.responses import StreamingResponse, Response
+from application.services.date_service import get_days_of_month, obtener_dia_semana,es_fin_de_semana, obtener_nombre_mes
 from application.services.excel_service import obtener_letra_columna
 from infrastructure.external_services.ipmAPI_service import get_api_info
 
-def generar_timereport_excel():
+
+def get_report(token,fechaInicio,fechaFin):
+    res = get_api_info(token,fechaInicio,fechaFin) #peticion GET al API de IPM
+    if len(res) == 0:
+        return None
+    else:
+        anio = fechaInicio.year
+        mes = obtener_nombre_mes(fechaInicio.month)        
+        clientes = []
+        files = []
+        consultor = res[0]["nombreUsuario"].replace(" ", "_")
+        nombre_archivo = f'TimeReport_{mes}_{anio}_{consultor}'
+        for data in res:
+            if data["clienteProyecto"] not in clientes:
+                clientes.append(data["clienteProyecto"])
+        if len(clientes) > 1 :   
+            for cliente in clientes:
+                res_filtrado = [item for item in res if item["clienteProyecto"] == cliente]            
+                files.append(generar_timereport_excel(res_filtrado,fechaInicio))
+            return zipfiles(files, nombre_archivo,clientes)
+        else:
+            file = generar_timereport_excel(res,fechaInicio)
+            response = StreamingResponse(file, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}.xlsx"
+            return response
+
+def zipfiles(file_objects, nombre_archivo,clientes):
+    zip_filename = f"{nombre_archivo}.zip"
+
+    s = io.BytesIO()
+    zf = zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED)
+
+    for index, file_object in enumerate(file_objects):
+        cliente = clientes[index]
+        cliente = cliente.replace(" ", "_")
+        # Calculate path for file in zip
+        fname =  f"{nombre_archivo}_{cliente}.xlsx" 
+
+        # Add file, at correct path
+        zf.writestr(fname, file_object.getvalue())
+
+    # Must close zip for all contents to be written
+    zf.close()
+
+    # Grab ZIP file from in-memory, make response with correct MIME-type
+    resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
+        'Content-Disposition': f'attachment;filename={zip_filename}'
+    })
+
+    return resp
+
+def generar_timereport_excel(res, fechaInicio):
     # Configura la localización para la fecha en español
     locale.setlocale(locale.LC_TIME, 'es_ES.utf8')
 
-    # Obtiene la fecha actual y el nombre del mes en español
-    fecha_actual = datetime.now().strftime('%d%m%y')
-    mes_actual = datetime.now().strftime('%B').capitalize()
-    anio_actual = datetime.now().year
-    numero_mes_Actual = obtener_numero_mes_actual()
-    dias_del_mes = get_days_of_month(int(numero_mes_Actual))
+    # Obtiene los dias del mes
+    dias_del_mes = get_days_of_month(fechaInicio.month)
+    mes = obtener_nombre_mes(fechaInicio.month)
     count_row = 8 #para que empiece desde la fila 8
     cols_fin_semana = []
 
-    #Peticion GET al API
-    res = get_api_info()
     #Cliente
     cliente = res[0]["clienteProyecto"]
     #Consultor
@@ -29,9 +76,6 @@ def generar_timereport_excel():
     
     # Crea un archivo de Excel en la memoria, no en el disco
     output = io.BytesIO()
-
-    # Crea el nombre del archivo Excel basado en la fecha actual
-    nombre_archivo_excel = f'TimeReport_{fecha_actual}.xlsx'
 
    
     # Crea un nuevo archivo Excel y añade una hoja de trabajo
@@ -145,8 +189,8 @@ def generar_timereport_excel():
     worksheet.merge_range('C3:D3', cliente, bold_format)
     worksheet.merge_range('A4:B4', "Nombre del consultor:", bold_format)
     worksheet.merge_range('C4:D4', consultor, bold_format)
-    worksheet.merge_range('G2:H2', mes_actual.upper(), bold_format)
-    worksheet.merge_range('J2:L2', str(anio_actual), bold_format)
+    worksheet.merge_range('G2:H2', mes.upper(), bold_format)
+    worksheet.merge_range('J2:L2', fechaInicio.year, bold_format)
     worksheet.merge_range('A5:A7', 'N°', header_format)
     worksheet.merge_range('B5:B7', 'TIPO DE ACTIVIDAD', header_format)
     worksheet.merge_range('C5:C7', 'LÍDER DE PROYECTO', header_format)
@@ -167,7 +211,8 @@ def generar_timereport_excel():
         column_letter = obtener_letra_columna(i)
         cell_range_num = f'{column_letter}6:{column_letter}6'
         cell_range_dia = f'{column_letter}7:{column_letter}7'
-        dia = obtener_dia_semana(day_num)
+        fecha = datetime.date(fechaInicio.year, fechaInicio.month, int(day_num))
+        dia = obtener_dia_semana(fecha)
         es_fin_de_semana(dia,column_letter,cols_fin_semana)
         worksheet.write_string(cell_range_num, day_num, header_format)
         worksheet.write_string(cell_range_dia, dia, header_format)
@@ -206,12 +251,16 @@ def generar_timereport_excel():
         total_horas = 0
         for fecha in datos["fechasHoras"]:                        
             dia = int(fecha["fecha"].split("-")[2].split("T")[0])            
-            col_cell = obtener_letra_columna(i+dia)
+            col_cell = obtener_letra_columna(i+dia)            
             cell = f'{col_cell}{num_row}'
             worksheet.write_number(cell, float(fecha["horas"]), format_decimal)
             total_horas += float(fecha["horas"])
         cell = f'F{num_row}'
-        worksheet.write(cell, float(total_horas), format_decimal)
+        col_cell = obtener_letra_columna(len(dias_del_mes)+6)
+        cell_horas = f'G{num_row}:{col_cell}{num_row}'
+        formula = f'=SUM({cell_horas})'
+        worksheet.write_formula(cell, formula,format_decimal)
+        # worksheet.write(cell, float(total_horas), format_decimal)
         cell = f'{col_horas}{num_row}'
         worksheet.write(cell, float(total_horas), format_decimal)
         n = n + 1
@@ -263,14 +312,13 @@ def generar_timereport_excel():
 
     #Bordes para toda la celda
     cell_border = f'G8:{col_horas}{count_row}'
-    print(cell_border)
     worksheet.conditional_format(cell_border , { 'type' : 'blanks' , 'format' : format_with_border} )
     # Cierra el archivo Excel
     workbook.close()
     output.seek(0)
 
      # Crea una respuesta de streaming para enviar el archivo Excel
-    response = StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo_excel}"
+    # response = StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    # response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}"
 
-    return response
+    return output

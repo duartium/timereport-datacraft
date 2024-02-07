@@ -14,7 +14,6 @@ def get_days_of_month(month, year=None):
     
     # Calcula la diferencia de días entre el inicio del próximo mes y el inicio del mes actual
     days = [(start_of_month + timedelta(days=i)).day for i in range((next_month - start_of_month).days)]
-    
     # Convierte los días en strings
     return [str(day) for day in days]
 
@@ -33,13 +32,16 @@ def obtener_numero_mes_actual():
 
     return numero_mes_actual
 
-def obtener_dia_semana(dia):
+def obtener_nombre_mes(num):
+    meses = {1:"Enero", 2: "Febrero", 3:"Marzo", 4:"Abril", 5:"Mayo", 6:"Junio", 7:"Julio", 8:"Agosto"}
+    return meses[num]
+
+def obtener_dia_semana(fecha):
     dias = ['L','M','M','J','V','S','D']
-    fecha_actual = datetime.now()
-    mes = str(fecha_actual.month)
-    year = str(fecha_actual.year)
-    fecha = dia + '/' + mes + '/' + year
-    fecha = datetime.strptime(fecha, "%d/%m/%Y")
+    # mes = str(dia.month)
+    # year = str(dia.year)
+    # fecha = dia + '/' + mes + '/' + year
+    # fecha = datetime.strptime(fecha, "%d/%m/%Y")
     index = fecha.weekday()
     return dias[index]
 
@@ -47,84 +49,3 @@ def es_fin_de_semana(dia,col,arr):
     if(dia == 'S' or dia == 'D'):
         arr.append(col)
     return arr
-
-res = {
-  "success": "true",
-  "message": "OK",
-  "data": [
-            {
-            "proyecto":  
-                {
-                    "codigoProyecto" : "BB_FS_MEJ_FIRMAS_2023",
-                    "liderProyecto" : "BYRON ANDRES DUARTE MOREJON",
-                    "nombreProyecto": "Mejoras en proceso de escaneo de firmas COBIS",
-                    "actividades":
-                    [
-                        {
-                            "descripcionActividad": "Diseño",
-                            "tipoActividad": "Diseño",
-                            "fechas":
-                                [
-                                    {
-                                        "fechaActividad": "2024-02-01T00:00:00",
-                                        "cantidadHoras": 5
-                                    },
-                                    {
-                                        "fechaActividad":  "2024-02-02T00:00:00",
-                                        "cantidadHoras":  3
-                                    }
-                                ]				
-                        },
-                        {
-                            "descripcionActividad":  "Funcionalidades",
-                            "tipoActividad":  "Reunión",
-                            "fechas": 
-                                [
-                                    {
-                                        "fechaActividad":  "2024-02-05T00:00:00",
-                                        "cantidadHoras":  8
-                                    },
-                                    {
-                                        "fechaActividad":  "2024-02-06T00:00:00",
-                                        "cantidadHoras":  5
-                                    }
-                                ]				
-                        }
-                    ]
-                }
-        }
-    ]
-}
-
-def handler_response():
-    proyectos = res["data"]
-    for proyecto in proyectos:
-        cod_proyecto = proyecto["proyecto"]["codigoProyecto"]
-        lider_proyecto = proyecto["proyecto"]["liderProyecto"]
-        actividades = proyecto["proyecto"]["actividades"]
-        for actividad in actividades:
-            tipo = actividad["tipoActividad"]
-            fechas = actividad["fechas"]
-            duracion_total = 0
-            print("Tipo de actividad %s" %tipo)
-            for fecha in fechas:
-                fechaActividad = fecha["fechaActividad"]
-                cantidadHoras = fecha["cantidadHoras"]
-                duracion_total = duracion_total + cantidadHoras
-                print(fechaActividad, cantidadHoras)
-                
-            print("Total de horas: %d" %duracion_total)
-        print ("Codigo proyecto: %s"%cod_proyecto)
-        print ("Lider proyecto: %s"%lider_proyecto)
-
-    
-
-def obtener_inicio_fin_mes():
-    mes_actual = datetime.now().month
-    año_actual = datetime.now().year
-    dias = len(get_days_of_month(mes_actual))
-    inicio = f"{mes_actual}/01/{año_actual}"
-    fin = f"{mes_actual}/{dias}/{año_actual}"
-    fecha_inicio = datetime.strptime(inicio, '%m/%d/%Y')
-    fecha_fin = datetime.strptime(fin, '%m/%d/%Y')
-    return [inicio, fin]
