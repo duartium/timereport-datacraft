@@ -6,11 +6,11 @@ import zipfile
 from fastapi.responses import StreamingResponse, Response
 from application.services.date_service import get_days_of_month, obtener_dia_semana,es_fin_de_semana, obtener_nombre_mes
 from application.services.excel_service import obtener_letra_columna
-from infrastructure.external_services.ipmAPI_service import get_api_info
+from infrastructure.external_services.ipmAPI_service import get_api_info, get_reporte_cliente, get_info_clientes_usuarios
 
 
-def get_report(token,fechaInicio,fechaFin):
-    res = get_api_info(token,fechaInicio,fechaFin) #peticion GET al API de IPM
+def get_report(token,fechaInicio,fechaFin, idUsuario):
+    res = get_api_info(token,fechaInicio,fechaFin, idUsuario) #peticion GET al API de IPM
     if len(res) == 0:
         return None
     else:
@@ -34,6 +34,33 @@ def get_report(token,fechaInicio,fechaFin):
             response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}.xlsx"
             return response
 
+def get_report_client(token,fechaInicio,fechaFin, idCliente):
+    res = get_reporte_cliente(token,fechaInicio,fechaFin, idCliente) #peticion GET al API de IPM
+    if len(res) == 0:
+        return None
+    else:
+        anio = fechaInicio.year
+        mes = obtener_nombre_mes(fechaInicio.month)        
+        usuarios = []
+        files = []
+        print(res[0]["clienteProyecto"])
+        cliente = res[0]["clienteProyecto"].replace(" ", "_").replace("\r", "").replace("\n", "")
+        nombre_archivo = f'TimeReport_{mes}_{anio}_{cliente}'
+        for data in res:
+            if data["nombreUsuario"] not in usuarios:
+                usuarios.append(data["nombreUsuario"])
+        if len(usuarios) > 1 :   
+            for cliente in usuarios:
+                res_filtrado = [item for item in res if item["clienteProyecto"] == cliente]            
+                files.append(generar_timereport_excel(res_filtrado,fechaInicio))
+            return zipfiles_clientes(files, nombre_archivo,usuarios)
+        else:
+            file = generar_timereport_excel(res,fechaInicio)
+            response = StreamingResponse(file, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+            response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}.xlsx"
+            return response
+
+
 def zipfiles(file_objects, nombre_archivo,clientes):
     zip_filename = f"{nombre_archivo}.zip"
 
@@ -45,6 +72,31 @@ def zipfiles(file_objects, nombre_archivo,clientes):
         cliente = cliente.replace(" ", "_")
         # Calculate path for file in zip
         fname =  f"{nombre_archivo}_{cliente}.xlsx" 
+
+        # Add file, at correct path
+        zf.writestr(fname, file_object.getvalue())
+
+    # Must close zip for all contents to be written
+    zf.close()
+
+    # Grab ZIP file from in-memory, make response with correct MIME-type
+    resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
+        'Content-Disposition': f'attachment;filename={zip_filename}'
+    })
+
+    return resp
+
+def zipfiles_clientes(file_objects, nombre_archivo,usuarios):
+    zip_filename = f"{nombre_archivo}.zip"
+
+    s = io.BytesIO()
+    zf = zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED)
+
+    for index, file_object in enumerate(file_objects):
+        usuario = usuarios[index]
+        usuario = usuario.replace(" ", "_")
+        # Calculate path for file in zip
+        fname =  f"{nombre_archivo}_{usuario}.xlsx" 
 
         # Add file, at correct path
         zf.writestr(fname, file_object.getvalue())

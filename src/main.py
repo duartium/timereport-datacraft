@@ -1,8 +1,7 @@
 import datetime
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from infrastructure.reports.excel.time_report.excel_timereport import generar_timereport_excel,get_report
-from infrastructure.external_services.ipmAPI_service import get_api_info
+from infrastructure.reports.excel.time_report.excel_timereport import get_report, get_report_client
 import logging
 import traceback    
 app = FastAPI()
@@ -21,12 +20,30 @@ app.add_middleware(
 )
 
 @app.get('/', tags=['ReporteExcel'])
-async def generar_timereport(token: str, fechaInicio: datetime.date, fechaFin: datetime.date):
+async def generar_timereport(token: str, fechaInicio: datetime.date, fechaFin: datetime.date, idUsuario: int | None = None):
     """
     Genera y devuelve un reporte de TimeReport en formato Excel.
     """
     try:
-        return get_report(token,fechaInicio,fechaFin)     
+        return get_report(token,fechaInicio,fechaFin, idUsuario)     
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        stack_trace = traceback.format_exc()
+        detail = {
+            "error": str(e),
+            "trace": stack_trace
+        }
+        logger.error(f"Error generando TimeReport: {str(e)}")
+        raise HTTPException(status_code=500, detail=detail)
+    
+@app.get('/cliente', tags=['ReporteExcelCliente'])
+async def generar_timereport_cliente(token: str, fechaInicio: datetime.date, fechaFin: datetime.date, idCliente: int | None = None):
+    """
+    Genera y devuelve un reporte de TimeReport en formato Excel por Cliente.
+    """
+    try:
+        return get_report_client(token,fechaInicio,fechaFin, idCliente)     
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
