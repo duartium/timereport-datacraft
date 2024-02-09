@@ -43,7 +43,6 @@ def get_report_client(token,fechaInicio,fechaFin, idCliente):
         mes = obtener_nombre_mes(fechaInicio.month)        
         usuarios = []
         files = []
-        nombreCliente = res[0]["clienteProyecto"] 
         cliente = res[0]["clienteProyecto"].replace(" ", "_").replace("\r", "").replace("\n", "")
         print(cliente)
         nombre_archivo = f'TimeReport_{mes}_{anio}_{cliente}'

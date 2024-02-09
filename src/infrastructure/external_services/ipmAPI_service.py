@@ -1,6 +1,6 @@
 import requests
 
-def get_api_info(token,fechaInicio,fechaFin,idUsuario):   
+def get_api_info(token,fechaInicio,fechaFin,idUsuario=None):   
     api_auth = "Bearer %s"%token 
     headers = {'Authorization': api_auth}
     api = 'http://localhost:5205/api/actividad-diaria/actividades-reporte-tr'
