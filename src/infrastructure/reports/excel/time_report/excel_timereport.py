@@ -43,15 +43,17 @@ def get_report_client(token,fechaInicio,fechaFin, idCliente):
         mes = obtener_nombre_mes(fechaInicio.month)        
         usuarios = []
         files = []
-        print(res[0]["clienteProyecto"])
+        nombreCliente = res[0]["clienteProyecto"] 
         cliente = res[0]["clienteProyecto"].replace(" ", "_").replace("\r", "").replace("\n", "")
+        print(cliente)
         nombre_archivo = f'TimeReport_{mes}_{anio}_{cliente}'
         for data in res:
             if data["nombreUsuario"] not in usuarios:
                 usuarios.append(data["nombreUsuario"])
+        print(len(usuarios))
         if len(usuarios) > 1 :   
-            for cliente in usuarios:
-                res_filtrado = [item for item in res if item["clienteProyecto"] == cliente]            
+            for usuario in usuarios:
+                res_filtrado = [item for item in res if item["nombreUsuario"] == usuario]            
                 files.append(generar_timereport_excel(res_filtrado,fechaInicio))
             return zipfiles_clientes(files, nombre_archivo,usuarios)
         else:
