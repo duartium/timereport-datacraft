@@ -1,9 +1,11 @@
 import requests
 
+url = 'http://localhost:5205/api/actividad-diaria/'
+
 def get_api_info(token,fechaInicio,fechaFin,idUsuario=None):   
     api_auth = "Bearer %s"%token 
     headers = {'Authorization': api_auth}
-    api = 'http://localhost:5205/api/actividad-diaria/actividades-reporte-tr'
+    api = url + 'actividades-reporte-tr'
     params = {
         "fechaInicio" : fechaInicio,
         "fechaFin" : fechaFin,
@@ -13,14 +15,15 @@ def get_api_info(token,fechaInicio,fechaFin,idUsuario=None):
     response = res.json()
     return response
 
-def get_info_clientes_usuarios(token, fechaInicio, fechaFin, idCliente):
+def get_api_info_usuario_cliente(token,fechaInicio,fechaFin,idUsuario, idCliente):   
     api_auth = "Bearer %s"%token 
     headers = {'Authorization': api_auth}
-    api = 'http://localhost:5205/api/actividad-diaria/usuarios-cliente'
+    api = url + 'actividades-reporte-usuario-cliente'
     params = {
         "fechaInicio" : fechaInicio,
         "fechaFin" : fechaFin,
-        "idCliente" : idCliente
+        "idCliente" : idCliente,
+        "idUsuario" : idUsuario
     }
     res = requests.get(api, headers=headers, params=params) 
     response = res.json()
@@ -30,7 +33,7 @@ def get_info_clientes_usuarios(token, fechaInicio, fechaFin, idCliente):
 def get_reporte_cliente(token, fechaInicio,fechaFin,idCliente):
     api_auth = "Bearer %s"%token 
     headers = {'Authorization': api_auth}
-    api = 'http://localhost:5205/api/actividad-diaria/actividades-reporte-cliente'
+    api = url + 'actividades-reporte-cliente'
     params = {
         "fechaInicio" : fechaInicio,
         "fechaFin" : fechaFin,

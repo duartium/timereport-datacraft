@@ -1,7 +1,7 @@
 import datetime
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from infrastructure.reports.excel.time_report.excel_timereport import get_report, get_report_client
+from infrastructure.reports.excel.time_report.excel_timereport import get_report, get_report_client, get_report_usuario_cliente, get_report_all_users
 import logging
 from pydantic import BaseModel
 import traceback    
@@ -23,10 +23,12 @@ class BodyReportePost(BaseModel):
     fechaInicio: datetime.date
     fechaFin: datetime.date
 
-class BodyReporteUserPost(BaseModel):
+class BodyUsuarioClientePost(BaseModel):
     fechaInicio: datetime.date
     fechaFin: datetime.date
-    idUsuario: int | None = None
+    idUsuario: int 
+    idCliente: int 
+
 class BodyReporteClientePost(BaseModel):
     fechaInicio: datetime.date
     fechaFin: datetime.date
@@ -35,7 +37,7 @@ class BodyReporteClientePost(BaseModel):
 @app.post('/api/generar-reporte-usuario', tags=['ReporteExcel'])
 async def generar_timereport(body : BodyReportePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel para la pantalla de actividades desde usuario en Time Report.
+    Método para generar reporte Excel para la pantalla de actividades desde usuario 'Consultor' en Time Report.
     """
     try:
         return get_report(token,body.fechaInicio,body.fechaFin, None)     
@@ -50,13 +52,13 @@ async def generar_timereport(body : BodyReportePost,token: str = Header(...)):
         logger.error(f"Error generando TimeReport: {str(e)}")
         raise HTTPException(status_code=500, detail=detail)
     
-@app.post('/api/generar-reporte', tags=['ReporteExcel'])
-async def generar_timereport(body : BodyReporteUserPost,token: str = Header(...)):
+@app.post('/api/generar-reporte-usuario-cliente', tags=['ReporteExcel'])
+async def generar_timereport(body : BodyUsuarioClientePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel por consultor desde la pantalla de reportes de administrativos en Time Report.
+    Método para generar reporte Excel de un consultor del cliente desde la pantalla de reportes como usuario 'Administrativo' en Time Report.
     """
     try:
-        return get_report(token,body.fechaInicio,body.fechaFin, body.idUsuario)     
+        return get_report_usuario_cliente(token,body.fechaInicio,body.fechaFin, body.idUsuario, body.idCliente)     
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
@@ -71,10 +73,14 @@ async def generar_timereport(body : BodyReporteUserPost,token: str = Header(...)
 @app.post('/api/generar-reporte-cliente', tags=['ReporteExcelCliente'])
 async def generar_timereport_cliente(body : BodyReporteClientePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel para la pantalla de administrativos que deseen visualizar los reportes de actividades en Time Report.
+    Método para generar reporte Excel de todos los consultores del cliente desde la pantalla de administrativos que deseen visualizar los reportes de actividades en Time Report.
     """
     try:
-        return get_report_client(token,body.fechaInicio, body.fechaFin, body.idCliente)     
+        if(body.idCliente == 0):
+            return get_report_all_users(token,body.fechaInicio, body.fechaFin)
+        else:
+            return get_report_client(token,body.fechaInicio, body.fechaFin, body.idCliente)
+        
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
