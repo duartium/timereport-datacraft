@@ -37,7 +37,7 @@ class BodyReporteClientePost(BaseModel):
 @app.post('/api/generar-reporte-usuario', tags=['ReporteExcel'])
 async def generar_timereport(body : BodyReportePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel para la pantalla de actividades desde usuario 'Consultor' en Time Report.
+    Método para generar reporte Excel para la pantalla de actividades desde la pantalla del consultor en Time Report. Genera un archivo excel en caso de que esté con un cliente y un archivo .zip en caso de que esté con más de uno.
     """
     try:
         return get_report(token,body.fechaInicio,body.fechaFin, None)     
@@ -52,10 +52,10 @@ async def generar_timereport(body : BodyReportePost,token: str = Header(...)):
         logger.error(f"Error generando TimeReport: {str(e)}")
         raise HTTPException(status_code=500, detail=detail)
     
-@app.post('/api/generar-reporte-usuario-cliente', tags=['ReporteExcel'])
-async def generar_timereport(body : BodyUsuarioClientePost,token: str = Header(...)):
+@app.post('/api/generar-reporte-usuario-cliente', tags=['ReporteExcelCliente'])
+async def generar_timereport_usuario_por_cliente(body : BodyUsuarioClientePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel de un consultor del cliente desde la pantalla de reportes como usuario 'Administrativo' en Time Report.
+    Método para generar reporte Excel de un consultor en específico del cliente desde la pantalla administrativos en Time Report.
     """
     try:
         return get_report_usuario_cliente(token,body.fechaInicio,body.fechaFin, body.idUsuario, body.idCliente)     
@@ -73,7 +73,7 @@ async def generar_timereport(body : BodyUsuarioClientePost,token: str = Header(.
 @app.post('/api/generar-reporte-cliente', tags=['ReporteExcelCliente'])
 async def generar_timereport_cliente(body : BodyReporteClientePost,token: str = Header(...)):
     """
-    Método para generar reporte Excel de todos los consultores del cliente desde la pantalla de administrativos que deseen visualizar los reportes de actividades en Time Report.
+    Método para generar un archivo .zip con los reportes Excel de todos los consultores del cliente desde la pantalla de administrativos que deseen visualizar los reportes de actividades en Time Report.
     """
     try:
         if(body.idCliente == 0):

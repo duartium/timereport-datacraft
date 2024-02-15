@@ -1,6 +1,6 @@
 import requests
 
-url = 'http://localhost:5205/api/actividad-diaria/'
+url = 'http://192.168.100.67:8089/api/actividad-diaria/'
 
 def get_api_info(token,fechaInicio,fechaFin,idUsuario=None):   
     api_auth = "Bearer %s"%token 

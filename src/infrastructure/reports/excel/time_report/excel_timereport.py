@@ -17,13 +17,12 @@ def get_report(token,fechaInicio,fechaFin, idUsuario):
         res = res["data"]
         anio = fechaInicio.year
         mes = obtener_nombre_mes(fechaInicio.month)        
-        clientes = []
+        clientes = set()
         files = []
         consultor = res[0]["nombreUsuario"].replace(" ", "_")
         nombre_archivo = f'TimeReport_{mes}_{anio}_{consultor}'
         for data in res:
-            if data["clienteProyecto"] not in clientes:
-                clientes.append(data["clienteProyecto"])
+            clientes.add(data["clienteProyecto"])
         if len(clientes) > 1 :   
             for cliente in clientes:
                 res_filtrado = [item for item in res if item["clienteProyecto"] == cliente]            
@@ -43,13 +42,13 @@ def get_report_usuario_cliente(token,fechaInicio,fechaFin, idUsuario, idCliente)
         res = res["data"]
         anio = fechaInicio.year
         mes = obtener_nombre_mes(fechaInicio.month)        
-        clientes = []
+        clientes = set()
         files = []
         consultor = res[0]["nombreUsuario"].replace(" ", "_")
-        nombre_archivo = f'TimeReport_{mes}_{anio}_{consultor}'
+        cliente = res[0]["clienteProyecto"].replace(" ", "_").replace("\r", "").replace("\n", "")
+        nombre_archivo = f'TimeReport_{mes}_{anio}_{consultor}_{cliente}'
         for data in res:
-            if data["clienteProyecto"] not in clientes:
-                clientes.append(data["clienteProyecto"])
+            clientes.add(data["clienteProyecto"])
         if len(clientes) > 1 :   
             for cliente in clientes:
                 res_filtrado = [item for item in res if item["clienteProyecto"] == cliente]            
@@ -69,13 +68,12 @@ def get_report_all_users(token,fechaInicio,fechaFin):
         res = res["data"]       
         anio = fechaInicio.year
         mes = obtener_nombre_mes(fechaInicio.month)        
-        usuario_cliente = []
+        usuario_cliente = set()
         files = []
         nombre_archivo = f'TimeReport_{mes}_{anio}'
         for data in res:
             info_usuario_cliente = data["nombreUsuario"],data["nombreProyecto"], data["clienteProyecto"]
-            if info_usuario_cliente not in usuario_cliente:
-                usuario_cliente.append(info_usuario_cliente)
+            usuario_cliente.add(info_usuario_cliente)
         if len(usuario_cliente) > 1 :   
             for usuario in usuario_cliente:
                 res_filtrado = [item for item in res if (item["nombreUsuario"],item["nombreProyecto"], item["clienteProyecto"])  == usuario]         
@@ -95,13 +93,12 @@ def get_report_client(token,fechaInicio,fechaFin, idCliente):
         res = res["data"]       
         anio = fechaInicio.year
         mes = obtener_nombre_mes(fechaInicio.month)        
-        usuarios = []
+        usuarios = set()
         files = []
         cliente = res[0]["clienteProyecto"].replace(" ", "_").replace("\r", "").replace("\n", "")
         nombre_archivo = f'TimeReport_{mes}_{anio}_{cliente}'
         for data in res:
-            if data["nombreUsuario"] not in usuarios:
-                usuarios.append(data["nombreUsuario"])
+            usuarios.add(data["nombreUsuario"])
         if len(usuarios) > 1 :   
             for usuario in usuarios:
                 res_filtrado = [item for item in res if item["nombreUsuario"] == usuario]            
@@ -116,7 +113,7 @@ def get_report_client(token,fechaInicio,fechaFin, idCliente):
 
 def zipfiles(file_objects, nombre_archivo,clientes):
     zip_filename = f"{nombre_archivo}.zip"
-
+    clientes = list(clientes)
     s = io.BytesIO()
     zf = zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED)
 
@@ -135,7 +132,7 @@ def zipfiles(file_objects, nombre_archivo,clientes):
     return resp
 def zipfiles_all_usuarios(file_objects, nombre_archivo,data):
     zip_filename = f"{nombre_archivo}.zip"
-
+    data = list(data)
     s = io.BytesIO()
     zf = zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED)
 
@@ -157,7 +154,7 @@ def zipfiles_all_usuarios(file_objects, nombre_archivo,data):
 
 def zipfiles_clientes(file_objects, nombre_archivo,usuarios):
     zip_filename = f"{nombre_archivo}.zip"
-
+    usuarios = list(usuarios)
     s = io.BytesIO()
     zf = zipfile.ZipFile(s, "w", zipfile.ZIP_DEFLATED)
 
