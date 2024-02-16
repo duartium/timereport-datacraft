@@ -1,7 +1,7 @@
 import datetime
 from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from infrastructure.reports.excel.time_report.excel_timereport import get_report, get_report_client, get_report_usuario_cliente, get_report_all_users
+from infrastructure.reports.excel.time_report.handleResponses import get_report, get_report_client, get_report_usuario_cliente, get_report_all_users
 import logging
 from pydantic import BaseModel
 import traceback    
