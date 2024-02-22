@@ -5,8 +5,6 @@ import io
 from application.services.date_service import get_days_of_month, obtener_dia_semana,es_fin_de_semana, obtener_nombre_mes
 from application.services.excel_service import obtener_letra_columna
 
-
-
 def generar_timereport_excel(res, fechaInicio):
     # Configura la localización para la fecha en español
     locale.setlocale(locale.LC_TIME, 'es_ES.utf8')

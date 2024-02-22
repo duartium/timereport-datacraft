@@ -33,7 +33,7 @@ def obtener_numero_mes_actual():
     return numero_mes_actual
 
 def obtener_nombre_mes(num):
-    meses = {1:"Enero", 2: "Febrero", 3:"Marzo", 4:"Abril", 5:"Mayo", 6:"Junio", 7:"Julio", 8:"Agosto"}
+    meses = {1:"Enero", 2: "Febrero", 3:"Marzo", 4:"Abril", 5:"Mayo", 6:"Junio", 7:"Julio", 8:"Agosto", 9:"Septiembre", 10:"Octubre", 11:"Noviembre", 12:"Diciembre"}
     return meses[num]
 
 def obtener_dia_semana(fecha):
@@ -49,3 +49,20 @@ def es_fin_de_semana(dia,col,arr):
     if(dia == 'S' or dia == 'D'):
         arr.append(col)
     return arr
+
+def obtener_numero_mes(mes):
+    meses = {
+    "ENERO": 1,
+    "FEBRERO": 2,
+    "MARZO": 3,
+    "ABRIL": 4,
+    "MAYO": 5,
+    "JUNIO": 6,
+    "JULIO": 7,
+    "AGOSTO": 8,
+    "SEPTIEMBRE": 9,
+    "OCTUBRE": 10,
+    "NOVIEMBRE": 11,
+    "DICIEMBRE": 12
+    }
+    return meses[mes]

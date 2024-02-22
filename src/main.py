@@ -1,7 +1,8 @@
 import datetime
-from fastapi import FastAPI, HTTPException, Header, Depends
+from fastapi import FastAPI, HTTPException, Header, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from infrastructure.reports.excel.time_report.handleResponses import get_report, get_report_client, get_report_usuario_cliente, get_report_all_users
+from infrastructure.reports.excel.readExcel import leer_excel
 import logging
 from pydantic import BaseModel
 import traceback    
@@ -91,4 +92,19 @@ async def generar_timereport_cliente(body : BodyReporteClientePost,token: str = 
         }
         logger.error(f"Error generando TimeReport: {str(e)}")
         raise HTTPException(status_code=500, detail=detail)
-    
+
+@app.post('/api/leer-reporte', tags=['LeerReporteExcel'])
+async def leer_reporte(file: UploadFile,token: str = Header(...)):
+    try:
+        contenido = await file.read()  # Espera la lectura del contenido del archivo
+        return leer_excel(contenido, token)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        stack_trace = traceback.format_exc()
+        detail = {
+            "error": str(e),
+            "trace": stack_trace
+        }
+        logger.error(f"Error importando TimeReport: {str(e)}")
+        raise HTTPException(status_code=500, detail=detail)
