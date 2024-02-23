@@ -12,11 +12,16 @@ acentos = {
     "Planificacion": "Planificación",
     "Prueba de deposito especial en linea": "Prueba de depósito especial en línea",
     "Pruebas de notifiacion latina CNT": "Pruebas de notificación latina CNT",
-    "Pruebas de notificacion latina Claro": "Pruebas de notificación latina Claro",
+    "Pruebas de notificaciones latina Claro": "Pruebas de notificación latina Claro",
     "Pruebas produccion": "Pruebas producción",
     "Reunion": "Reunión",
+    "Reuniones": "Reunión",
     "Revision": "Revisión",
+    "Retroespectiva": "Retrospectiva",
+    "Revisiòn de correo y daily": "Revisión de correo y daily",
     "Revision de correo y daily": "Revisión de correo y daily",
+    "Generacion de backoffice marglobal ventanilla": "Generación de backoffice marglobal ventanilla",
+    "Pruebas de ntificacion latinia cnt": "Pruebas de notificación latinia cnt",
     "Verificacion": "Verificación"
 }
 

@@ -62,10 +62,6 @@ def get_report_usuario_cliente(token,fechaInicio,fechaFin, idUsuario, idCliente)
             return zipfiles(files, nombre_archivo,clientes)
         else:
             file = generar_timereport_excel(res,fechaInicio)
-            # response = StreamingResponse(file, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            # response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}.xlsx"
-            # response.headers["Tipo"] = "EXCEL"
-            # return response
             archivo_base64 = base64.b64encode(file.getvalue()).decode("utf-8")
             response = {"archivo": archivo_base64, "tipo": "EXCEL"}            
             return Response(content=json.dumps(response), media_type="application/json")
@@ -91,10 +87,6 @@ def get_report_all_users(token,fechaInicio,fechaFin):
             return zipfiles_all_usuarios(files, nombre_archivo,usuario_cliente)
         else:
             file = generar_timereport_excel(res,fechaInicio)
-            # response = StreamingResponse(file, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-            # response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}.xlsx"
-            # response.headers["Tipo"] = "EXCEL"
-            # return response
             archivo_base64 = base64.b64encode(file.getvalue()).decode("utf-8")
             response = {"archivo": archivo_base64, "tipo": "EXCEL"}            
             return Response(content=json.dumps(response), media_type="application/json")
@@ -138,10 +130,6 @@ def zipfiles(file_objects, nombre_archivo,clientes):
         zf.writestr(fname, file_object.getvalue())
     zf.close()
 
-    # resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
-    #     'Content-Disposition': f'attachment;filename={zip_filename}',
-    #     'Tipo' : 'ZIP' 
-    # })
     archivo_base64 = base64.b64encode(s.getvalue()).decode("utf-8")
     response = {"archivo": archivo_base64, "tipo": "ZIP"} 
     return Response(content=json.dumps(response), media_type="application/json")
@@ -162,10 +150,6 @@ def zipfiles_all_usuarios(file_objects, nombre_archivo,data):
         zf.writestr(fname, file_object.getvalue())
     zf.close()
 
-    # resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
-    #     'Content-Disposition': f'attachment;filename={zip_filename}',
-    #     'Tipo' : 'ZIP' 
-    # })
     archivo_base64 = base64.b64encode(s.getvalue()).decode("utf-8")
     response = {"archivo": archivo_base64, "tipo": "ZIP"} 
     return Response(content=json.dumps(response), media_type="application/json")
@@ -186,9 +170,4 @@ def zipfiles_clientes(file_objects, nombre_archivo,usuarios):
     zf.close()
     archivo_base64 = base64.b64encode(s.getvalue()).decode("utf-8")
     response = {"archivo": archivo_base64, "tipo": "ZIP"}            
-    # resp = Response(s.getvalue(), media_type="application/x-zip-compressed", headers={
-    #     'Content-Disposition': f'attachment;filename={zip_filename}',
-    #     'Tipo' : 'ZIP' 
-    # })
-
     return Response(content=json.dumps(response), media_type="application/json")

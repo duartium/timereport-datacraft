@@ -74,7 +74,8 @@ async def generar_timereport_usuario_por_cliente(body : BodyUsuarioClientePost,t
 @app.post('/api/generar-reporte-cliente', tags=['ReporteExcelCliente'])
 async def generar_timereport_cliente(body : BodyReporteClientePost,token: str = Header(...)):
     """
-    Método para generar un archivo .zip con los reportes Excel de todos los consultores del cliente desde la pantalla de administrativos que deseen visualizar los reportes de actividades en Time Report.
+    Método para generar un archivo .zip con los reportes Excel de todos los consultores del cliente desde la pantalla de administrativos que deseen 
+    visualizar los reportes de actividades en Time Report. Cuando idCliente es igual a 0 devuelve la información de todos los clientes.
     """
     try:
         if(body.idCliente == 0):
@@ -93,8 +94,11 @@ async def generar_timereport_cliente(body : BodyReporteClientePost,token: str = 
         logger.error(f"Error generando TimeReport: {str(e)}")
         raise HTTPException(status_code=500, detail=detail)
 
-@app.post('/api/leer-reporte', tags=['LeerReporteExcel'])
+@app.post('/api/importar-reporte-excel', tags=['ImportarReporteExcel'])
 async def leer_reporte(file: UploadFile,token: str = Header(...)):
+    """
+        Método para importar un reporte excel y registrarlo en el sistema.
+    """
     try:
         contenido = await file.read()  # Espera la lectura del contenido del archivo
         return leer_excel(contenido, token)

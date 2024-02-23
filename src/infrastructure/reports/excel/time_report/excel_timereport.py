@@ -12,6 +12,7 @@ def generar_timereport_excel(res, fechaInicio):
     # Obtiene los dias del mes
     dias_del_mes = get_days_of_month(fechaInicio.month)
     mes = obtener_nombre_mes(fechaInicio.month)
+    print("prueba")
     count_row = 8 #para que empiece desde la fila 8
     cols_fin_semana = []
 
@@ -262,9 +263,5 @@ def generar_timereport_excel(res, fechaInicio):
     # Cierra el archivo Excel
     workbook.close()
     output.seek(0)
-
-     # Crea una respuesta de streaming para enviar el archivo Excel
-    # response = StreamingResponse(output, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    # response.headers["Content-Disposition"] = f"attachment; filename={nombre_archivo}"
 
     return output

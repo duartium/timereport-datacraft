@@ -32,7 +32,7 @@ def leer_excel(contenido, token):
                     if fila_valores[4] is None:
                         break
                     descripcion = str(fila_valores[4])
-                    tipo_actividad = fila_valores[1].title()
+                    tipo_actividad = fila_valores[1].title().capitalize()
                     tipo_actividad_acc = agregar_acentos(tipo_actividad)
                     if tipo_actividad_acc is not None:
                           tipo_actividad = tipo_actividad_acc
@@ -51,13 +51,14 @@ def leer_excel(contenido, token):
                     actividad["fechasHoras"] = arr_fechas_horas
                     actividades.append(actividad)
         fila += 1
-    info_excel["usuario"] = hoja.cell(row=4, column=3).value
+    consultor =  hoja.cell(row=4, column=3).value
+    if consultor is None:
+         raise Exception("No existe nombre del consultor dentro del archivo Excel.")
+    info_excel["usuario"] = consultor
     info_excel["actividades"] = actividades
     info_excel = eliminar_saltos_de_linea(info_excel)
-    # print(info_excel)
     json_data = json.dumps(info_excel,ensure_ascii= False, indent=2)
     json_data = json.loads(json_data)
-    # verificar_json(json_data)
     res = post_importar_excel(json_data, token)
     return res
 

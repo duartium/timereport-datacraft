@@ -38,10 +38,6 @@ def obtener_nombre_mes(num):
 
 def obtener_dia_semana(fecha):
     dias = ['L','M','M','J','V','S','D']
-    # mes = str(dia.month)
-    # year = str(dia.year)
-    # fecha = dia + '/' + mes + '/' + year
-    # fecha = datetime.strptime(fecha, "%d/%m/%Y")
     index = fecha.weekday()
     return dias[index]
 
