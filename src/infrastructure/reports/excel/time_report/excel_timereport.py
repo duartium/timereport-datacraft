@@ -206,10 +206,9 @@ def generar_timereport_excel(res, fechaInicio):
         col_cell = obtener_letra_columna(len(dias_del_mes)+6)
         cell_horas = f'G{num_row}:{col_cell}{num_row}'
         formula = f'=SUM({cell_horas})'
-        worksheet.write_formula(cell, formula,format_decimal)
-        # worksheet.write(cell, float(total_horas), format_decimal)
+        worksheet.write_formula(cell, formula,format_decimal) #total horas por actividad
         cell = f'{col_horas}{num_row}'
-        worksheet.write(cell, float(total_horas), format_decimal)
+        worksheet.write(cell, formula, format_decimal)
         n = n + 1
         count_row = count_row + 1
     
